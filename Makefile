@@ -7,10 +7,10 @@ SRC=main.c
 OBJ_DIR=./obj
 OBJ=$(addprefix $(OBJ_DIR)/,$(subst .c,.o,$(SRC)))
 
-all:$(OBJ)
+all:$(PROJECT)
 
 $(PROJECT):$(OBJ)
-	$(CC) $(CFLAGS) -o $< $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o:%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
