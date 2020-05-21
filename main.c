@@ -23,20 +23,20 @@ int main(void) {
   wav->sampling_freq = 80000;
   wav->length = length;
 
-  write_sine(wav->signal, wav->length, 2000.0, 130, wav->sampling_freq);
+  test_sine(wav->signal, wav->length, 2000.0, 130, wav->sampling_freq);
 
   write_wav(fp, wav);
 
   fclose(fp);
 
-  // fp = fopen("test.wav", "rb");
-  // if (fp == NULL) {
-  //   perror("fopen rb failed.");
-  //   return -1;
-  // }
+  fp = fopen("test.wav", "rb");
+  if (fp == NULL) {
+    perror("fopen rb failed.");
+    return -1;
+  }
 
-  // read_wav(fp);
-  // fclose(fp);
+  read_wav(fp);
+  fclose(fp);
 
   return 0;
 }

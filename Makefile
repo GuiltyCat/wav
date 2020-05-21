@@ -4,7 +4,7 @@ LDFLAGS=-lm
 
 PROJECT=wav
 
-SRC=main.c wave.c
+SRC=main.c
 OBJ_DIR=./obj
 OBJ=$(addprefix $(OBJ_DIR)/,$(subst .c,.o,$(SRC)))
 
