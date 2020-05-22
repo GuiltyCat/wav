@@ -7,14 +7,20 @@ PROJECT=wav
 SRC=main.c
 OBJ_DIR=./obj
 OBJ=$(addprefix $(OBJ_DIR)/,$(subst .c,.o,$(SRC)))
+DEP=$(subst .o,.d,$(OBJ))
+
+.PHONY:all
 
 all:$(PROJECT)
 
-$(PROJECT):$(OBJ)
+$(PROJECT):$(OBJ) 
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
+-include $(DEP)
 $(OBJ_DIR)/%.o:%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -MMD -c -o $@ $<
+
+.PHONY:clean
 
 clean:
 	rm -rf $(OBJ_DIR) $(PROJECT)

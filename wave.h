@@ -1,7 +1,7 @@
 #include <math.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 typedef struct {
   unsigned bit_size;
   unsigned nchannel;
@@ -10,6 +10,17 @@ typedef struct {
   int16_t signal[];
 } Wav;
 
+Wav *wav_init(size_t len) {
+  Wav *wav = malloc(sizeof(Wav) + sizeof(int16_t) * len);
+  if (wav == NULL) {
+    return NULL;
+  }
+  wav->bit_size = 16;
+  wav->nchannel = 1;
+  wav->sampling_freq = 80000;
+  wav->length = len;
+  return wav;
+}
 
 int read_wav(FILE *fp) {
   uint8_t header[44] = {0};
@@ -153,6 +164,53 @@ int write_wav(FILE *fp, Wav *wav) {
   return 0;
 }
 
+/* do not use. only for simple test. */
+
+int16_t *test_sine(int16_t *wave, size_t len, double amp, double freq,
+                   uint32_t sampling_freq) {
+  for (size_t i = 0; i < len; i++) {
+    double s = amp * sin(2 * M_PI * i * freq / sampling_freq);
+    wave[i] = (int16_t)s;
+  }
+  return wave;
+}
+
+int wav_test(void){
+  FILE *fp = fopen("test.wav", "wb");
+  if (fp == NULL) {
+    perror("fp == NULL");
+    return -1;
+  }
+
+  size_t length = 1000000;
+  Wav* wav = wav_init(length);
+  if (wav == NULL){
+	  perror("wav == NULL");
+	  return -1;
+  }
+
+  test_sine(wav->signal, wav->length, 2000.0, 130, wav->sampling_freq);
+
+  write_wav(fp, wav);
+
+  fclose(fp);
+
+  fp = fopen("test.wav", "rb");
+  if (fp == NULL) {
+    perror("fopen rb failed.");
+    return -1;
+  }
+
+  read_wav(fp);
+  fclose(fp);
+
+  return 0;
+}
+
+/********************************************
+ * Design Wave
+ ********************************************/
+
 int16_t *fill(int16_t *wave, size_t len, int16_t v) {
   for (size_t i = 0; i < len; i++) {
     wave[i] = v;
@@ -167,9 +225,23 @@ int16_t *add_wave(int16_t *to, int16_t *from, size_t len) {
   return to;
 }
 
+int16_t *multi_wave(int16_t *wave, size_t len, int16_t num, int16_t den) {
+  for (size_t i = 0; i < len; i++) {
+    wave[i] *= num / den;
+  }
+  return wave;
+}
+
 int16_t *prod_wave(int16_t *to, int16_t *from, size_t len) {
   for (size_t i = 0; i < len; i++) {
     to[i] *= from[i];
+  }
+  return to;
+}
+
+int16_t *div_wave(int16_t *to, int16_t *from, size_t len) {
+  for (size_t i = 0; i < len; i++) {
+    to[i] /= from[i];
   }
   return to;
 }
@@ -178,13 +250,6 @@ int16_t *line(int16_t *wave, size_t len, int16_t start, int16_t end) {
   size_t tlen = len - 1;
   for (size_t i = 0; i < len; i++) {
     wave[i] = start * (tlen - i) / tlen + end * i / tlen;
-  }
-  return wave;
-}
-
-int16_t *repeat(int16_t *wave, size_t len, int16_t *period, size_t plen) {
-  for (size_t i = 0; i < len; i++) {
-    wave[i] = period[i % plen];
   }
   return wave;
 }
@@ -199,23 +264,18 @@ int16_t *sine(int16_t *wave, size_t len) {
   return wave;
 }
 
-size_t sec2len(double sec, double freq, uint32_t sampling_freq){
-	return sampling_freq;
+size_t sec2len(double sec, uint32_t sampling_freq) {
+  return sec * sampling_freq;
 }
 
 size_t freq2len(double freq, uint32_t sampling_freq) {
   /* return length of one wave */
-  size_t len = sampling_freq / freq;
-  return len;
+  return sampling_freq / freq;
 }
 
-/* do not use. only for simple test. */
-
-int16_t *test_sine(int16_t *wave, size_t len, double amp, double freq,
-                   uint32_t sampling_freq) {
+int16_t *repeat(int16_t *wave, size_t len, int16_t *period, size_t plen) {
   for (size_t i = 0; i < len; i++) {
-    double s = amp * sin(2 * M_PI * i * freq / sampling_freq);
-    wave[i] = (int16_t)s;
+    wave[i] = period[i % plen];
   }
   return wave;
 }
