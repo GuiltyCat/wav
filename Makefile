@@ -20,7 +20,7 @@ $(PROJECT):$(OBJ)
 $(OBJ_DIR)/%.o:%.c
 	$(CC) $(CFLAGS) -MMD -c -o $@ $<
 
-.PHONY:clean
+.PHONY:clean plot
 
 clean:
 	rm -rf $(OBJ_DIR) $(PROJECT)
